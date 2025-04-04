@@ -1,5 +1,6 @@
 ﻿using GamePrototype.Dungeon;
 using GamePrototype.Items.EconomicItems;
+using GamePrototype.Items.EquipItems;
 
 namespace GamePrototype.Utils
 {
@@ -10,9 +11,9 @@ namespace GamePrototype.Utils
             var enter = new DungeonRoom("Enter");
             var monsterRoom = new DungeonRoom("Monster", UnitFactoryDemo.CreateGoblinEnemy());
             var emptyRoom = new DungeonRoom("Empty");
-            var lootRoom = new DungeonRoom("Loot1", new Gold());
-            var lootStoneRoom = new DungeonRoom("Loot1", new Grindstone("Stone"));
-            var finalRoom = new DungeonRoom("Final", new Grindstone("Stone1"));
+            var lootRoom = new DungeonRoom("LootRoom", new Weapon(15,15,"Bow"));
+            var lootStoneRoom = new DungeonRoom("LootStoneRoom", new Grindstone("Stone"));
+            var finalRoom = new DungeonRoom("Final", new Armor(50,50,"Helmet"));
 
             enter.TrySetDirection(Direction.Right, monsterRoom);
             enter.TrySetDirection(Direction.Left, emptyRoom);

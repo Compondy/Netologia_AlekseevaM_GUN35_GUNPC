@@ -6,8 +6,8 @@ namespace GamePrototype.Dungeon
     public sealed class DungeonRoom
     {      
         public readonly string Name;
-        public readonly Unit Enemy;
-        public readonly Item Loot;
+        public readonly Unit? Enemy;
+        public readonly Item? Loot;
         public readonly Dictionary<Direction, DungeonRoom> Rooms = new();
         public bool IsFinal => Rooms.Count == 0;
 

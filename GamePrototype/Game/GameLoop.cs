@@ -1,5 +1,6 @@
 ﻿using GamePrototype.Combat;
 using GamePrototype.Dungeon;
+using GamePrototype.Items.EquipItems;
 using GamePrototype.Units;
 using GamePrototype.Utils;
 
@@ -7,8 +8,8 @@ namespace GamePrototype.Game
 {
     public sealed class GameLoop
     {
-        private Unit _player;
-        private DungeonRoom _dungeon;
+        private Unit? _player;
+        private DungeonRoom? _dungeon;
         private readonly CombatManager _combatManager = new CombatManager();
         
         public void StartGame() 
@@ -25,15 +26,16 @@ namespace GamePrototype.Game
             Console.WriteLine("Welcome, player!");
             _dungeon = DungeonBuilder.BuildDungeon();
             Console.WriteLine("Enter your name");
-            _player = UnitFactoryDemo.CreatePlayer(Console.ReadLine());
-            Console.WriteLine($"Hello {_player.Name}");
+            var name = Console.ReadLine();
+            Console.WriteLine($"Hello {name}");
+            _player = UnitFactoryDemo.CreatePlayer(name!);
         }
 
         private void StartGameLoop()
         {
             var currentRoom = _dungeon;
             
-            while (currentRoom.IsFinal == false) 
+            while (currentRoom!.IsFinal == false) 
             {
                 StartRoomEncounter(currentRoom, out var success);
                 if (!success) 
@@ -44,10 +46,19 @@ namespace GamePrototype.Game
                 DisplayRouteOptions(currentRoom);
                 while (true) 
                 {
-                    if (Enum.TryParse<Direction>(Console.ReadLine(), out var direction) ) 
+                    if (Enum.TryParse<Direction>(Console.ReadLine(), out var direction) && currentRoom!.Rooms.TryGetValue(direction, out var nextRoom)) //проверка на доступное направление исправлена
                     {
-                        currentRoom = currentRoom.Rooms[direction];
-                        break;
+                        currentRoom = nextRoom;
+                        Console.WriteLine($"You've entered room {currentRoom.Name}.");
+                        if (currentRoom.Enemy == null && currentRoom.Loot == null)
+                        Console.WriteLine($"Inside you'v found nothing.");
+                        else
+                        {
+                            Console.WriteLine($"Inside you'v found:");
+                            if (currentRoom.Enemy!= null) Console.WriteLine($"Enemy: {currentRoom.Enemy.Name}");
+                            if (currentRoom.Loot != null) Console.WriteLine($"Loot: {currentRoom.Loot.Name}");
+                        }
+                            break;
                     }
                     else 
                     {
@@ -55,23 +66,19 @@ namespace GamePrototype.Game
                     }
                 }
             }
-            Console.WriteLine($"Congratulations, {_player.Name}");
+            Console.WriteLine($"Congratulations, {_player!.Name}");
             Console.WriteLine("Result: ");
-            Console.WriteLine(_player.ToString());
+            Console.WriteLine(_player!.ToString());
         }
 
         private void StartRoomEncounter(DungeonRoom currentRoom, out bool success)
         {
             success = true;
-            if (currentRoom.Loot != null) 
-            {
-                _player.AddItemToInventory(currentRoom.Loot);
-            }
             if (currentRoom.Enemy != null) 
             {
-                if (_combatManager.StartCombat(_player, currentRoom.Enemy) == _player)
+                if (_combatManager.StartCombat(_player!, currentRoom.Enemy) == _player)
                 {
-                    _player.HandleCombatComplete();
+                    _player!.HandleCombatComplete();
                     LootEnemy(currentRoom.Enemy);
                 }
                 else 
@@ -80,9 +87,15 @@ namespace GamePrototype.Game
                 }
             }
 
+            if (currentRoom.Loot != null)
+            {
+                _player!.AddItemToInventory(currentRoom.Loot);
+            }
+
+
             void LootEnemy(Unit enemy)
             {
-                _player.AddItemsFromUnitToInventory(enemy);
+                _player!.AddItemsFromUnitToInventory(enemy);
             }
         }
 

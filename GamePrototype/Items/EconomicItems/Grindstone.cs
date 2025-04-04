@@ -6,6 +6,7 @@
 
         public Grindstone(string name) : base(name)
         {
+            
         }    
     }
 }

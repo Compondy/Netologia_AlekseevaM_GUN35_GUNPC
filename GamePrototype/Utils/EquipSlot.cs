@@ -3,6 +3,6 @@
     public enum EquipSlot
     {
         Weapon,
-        Armour
+        Armor
     }
 }

@@ -1,10 +1,11 @@
 ﻿using GamePrototype.Items.EconomicItems;
+using GamePrototype.Items.EquipItems;
 
 namespace GamePrototype.Units
 {
     public abstract class Unit
     {
-        private const int INVENTORY_SIZE = 3;
+        private const int INVENTORY_SIZE = 4;
         private uint _health;
         private uint _maxHealth;
         protected uint BaseDamage;
@@ -14,7 +15,7 @@ namespace GamePrototype.Units
         public uint Health
         {
             get => _health;
-            protected set => _health = value;
+            protected set => _health = value <= _maxHealth ? value : _maxHealth; //не записывать health больше максимума
         }
 
         public uint MaxHealth => _maxHealth;
@@ -31,15 +32,11 @@ namespace GamePrototype.Units
         public void ApplyDamage(uint damage)
         {
             var damageApplied = CalculateAppliedDamage(damage);
-            if (_health < damageApplied || (_health - damageApplied) <= 0) 
-            {
+            if (_health <= damageApplied)// || (_health - damageApplied) <= 0) результат никогда не будет меньше 0 т.к. он uint
                 _health = 0;
-            }
             else 
-            {
                 _health -= damageApplied;
-            }
-            
+
             DamageReceiveHandler();
         }
 
@@ -55,19 +52,20 @@ namespace GamePrototype.Units
         {
             if (!Inventory.TryAdd(item)) 
             {
-                Console.WriteLine($"Inventory of {Name} is full");
-            }
+                Console.WriteLine($"Inventory of {Name} is full. Item: {item.Name} was discarded.");
+            } else Console.WriteLine($"You'v collected item: {item.Name}.");
         }
 
         public void AddItemsFromUnitToInventory(Unit unit)
         {
             for (int i = 0; i < unit.Inventory.Items.Count; i++) 
             {
-                if (!Inventory.TryAdd(unit.Inventory.Items[i])) 
+                if (!Inventory.TryAdd(unit.Inventory.Items[i]))
                 {
-                    //inventory is full
+                    Console.WriteLine($"Loot discarded: {unit.Inventory.Items[i].Name} because inventory is full.");
                     return;
                 }
+                else Console.WriteLine($"Loot added to inventory: {unit.Inventory.Items[i].Name}");
             }
         }
     }
